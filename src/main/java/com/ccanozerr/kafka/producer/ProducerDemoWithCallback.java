@@ -1,5 +1,6 @@
-package com.ccanozerr.kafka.tutorial1;
+package com.ccanozerr.kafka.producer;
 
+import com.ccanozerr.kafka.config.AppConfig;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
@@ -13,11 +14,9 @@ public class ProducerDemoWithCallback {
 
         Logger logger = LoggerFactory.getLogger(ProducerDemoWithCallback.class);
 
-        String bootstrapServers = "127.0.0.1:9092";
-
         // create producer properties
         Properties properties = new Properties();
-        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, AppConfig.BOOTSTRAP_SERVERS);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
@@ -28,23 +27,20 @@ public class ProducerDemoWithCallback {
 
             // create producer record
             ProducerRecord<String, String>  record =
-                    new ProducerRecord<>("first_topic", Integer.toString(i) + ". Message");
+                    new ProducerRecord<>(AppConfig.FIRST_TOPIC, i + ". Message");
 
             // send data - asynchronous
-            producer.send(record, new Callback() {
-                @Override
-                public void onCompletion(RecordMetadata recordMetadata, Exception e) {
-                    // executes every time a record is successfully sent or an exception is thrown
-                    if(e == null){
-                        // the record was successfully sent
-                        logger.info("Received new metadata. \n" +
-                                "Topic: " + recordMetadata.topic() + "\n" +
-                                "Partition: " + recordMetadata.partition() + "\n" +
-                                "Offset: " + recordMetadata.offset() + "\n" +
-                                "Timestamp: " + recordMetadata.timestamp());
-                    } else {
-                        logger.error("Error while producing", e);
-                    }
+            producer.send(record, (recordMetadata, e) -> {
+                // executes every time a record is successfully sent or an exception is thrown
+                if(e == null){
+                    // the record was successfully sent
+                    logger.info("Received new metadata. \n" +
+                            "Topic: " + recordMetadata.topic() + "\n" +
+                            "Partition: " + recordMetadata.partition() + "\n" +
+                            "Offset: " + recordMetadata.offset() + "\n" +
+                            "Timestamp: " + recordMetadata.timestamp());
+                } else {
+                    logger.error("Error while producing", e);
                 }
             });
         }

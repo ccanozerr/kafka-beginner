@@ -1,5 +1,6 @@
-package com.ccanozerr.kafka.tutorial1;
+package com.ccanozerr.kafka.producer;
 
+import com.ccanozerr.kafka.config.AppConfig;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
@@ -14,26 +15,23 @@ public class ProducerDemoKeys {
 
         Logger logger = LoggerFactory.getLogger(ProducerDemoKeys.class);
 
-        String bootstrapServers = "127.0.0.1:9092";
-
         // create producer properties
         Properties properties = new Properties();
-        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, AppConfig.BOOTSTRAP_SERVERS);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
         // create thee producer
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
 
-        for (int i = 0; i < 10; i++){
+        for (int i = 0; i < 100; i++){
 
             // create producer record
-            String topic = "first_topic";
             String value = i + ". Value";
             String key = i + ". Key";
 
             ProducerRecord<String, String>  record =
-                    new ProducerRecord<>(topic, key, value);
+                    new ProducerRecord<>(AppConfig.FIRST_TOPIC, key, value);
 
             logger.info("Key: " + key); // log the key
             /*
